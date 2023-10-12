@@ -1,0 +1,13 @@
+*.bin
+*.label
+*.npy
+*.pt
+*.txt
+*.pyc
+*.png
+*.pcd
+*.csv
+*.json
+*.pyc
+*.nbi
+*.nbc
