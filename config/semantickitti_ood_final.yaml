@@ -27,8 +27,8 @@ dataset_params:
   ignore_label: 0
   return_test: False
   fixed_volume_space: True conda install -c anaconda yaml 
-  # label_mapping: "../config/label_mapping/semantic-kitti.yaml"
-  label_mapping: "config/label_mapping/semantic-kitti.yaml"
+  label_mapping: "../config/label_mapping/semantic-kitti.yaml"
+  # label_mapping: "config/label_mapping/semantic-kitti.yaml"
   max_volume_space:
     - 50
     - 3.1415926
@@ -42,7 +42,7 @@ dataset_params:
 ###################
 ## Data_loader options
 train_data_loader:
-  data_path: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/semantic_kitti/dataset/sequences/"
+  data_path: "/home/tes_unreal/Desktop/Dataset_BA/semantic_kitti/dataset/sequences/"
   imageset: "train"
   return_ref: True
   batch_size: 2
@@ -50,7 +50,7 @@ train_data_loader:
   num_workers: 3
 
 val_data_loader:
-  data_path: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/semantic_kitti/dataset/sequences/"
+  data_path: "/home/tes_unreal/Desktop/Dataset_BA/semantic_kitti/dataset/sequences/"
   imageset: "val"
   return_ref: True
   batch_size: 1
