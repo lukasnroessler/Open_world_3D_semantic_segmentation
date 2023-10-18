@@ -1,3 +1,8 @@
 env/
 data/
 .vscode/
+**/__pycache__
+builder/__pycache__/
+config/__pycache__/
+dataloader/__pycache__/
+network/__pycache__/
