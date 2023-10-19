@@ -5,13 +5,18 @@ After saving the corresponding inference result files using this repository, ple
 
 ## Installation
 
-### Requirements
-- PyTorch >= 1.2 
-- yaml
-- Cython
-- [torch-scatter](https://github.com/rusty1s/pytorch_scatter)
-- [nuScenes-devkit](https://github.com/nutonomy/nuscenes-devkit) (optional for nuScenes)
-- [spconv](https://github.com/traveller59/spconv) (tested with spconv==1.2.1 and cuda==10.2)
+1. Clone the repository
+2. Setup a [venv](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) with `python3 -m venv env`
+3. Source the virtual environment with `source env/bin/activate`
+4. Update pip with `pip install --upgrade pip`
+5. Install all dependencies with `pip install -r requirements.txt`
+
+### Test environment
+
+- RTX 3080 Mobile (8 GB)
+- Ubuntu 20.04.6 LTS (running in WSL2 under Windows 11)
+- Python 3.8.10
+- NVIDIA-SMI 545.23.05 (Driver Version: 545.84 CUDA Version: 12.3)
 
 ## Data Preparation
 
