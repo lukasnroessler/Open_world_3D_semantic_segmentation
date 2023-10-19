@@ -1,5 +1,6 @@
 env/
 data/
+checkpoints/
 .vscode/
 builder/__pycache__/
 config/__pycache__/
