@@ -3,6 +3,15 @@
 Official implementation of "Open-world semantic segmentation for Lidar Point Clouds", ECCV 2022.
 After saving the corresponding inference result files using this repository, please use [semantic_kitti_api](https://github.com/Jun-CEN/semantic_kitti_api) and [nuScenes_api](https://github.com/Jun-CEN/nuScenes_api) to evaluate the performance.
 
+## Fork Details
+
+Compared to the original repository, this fork builds on more recent packages, including:
+- PyTorch 2.1
+- CUDA 12.1
+- spconv 2.3 (changes supported by code from [robo-alex](https://github.com/xinge008/Cylinder3D/pull/113/commits/df586da89e6275b21370d46619409c42340e1401))
+- numpy 1.24
+
+
 ## Installation
 
 1. Clone the repository
