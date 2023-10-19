@@ -105,7 +105,7 @@ def main(args):
             count = 0
             point_predict = predict_labels[
                 count, val_grid[count][:, 0], val_grid[count][:, 1], val_grid[count][:, 2]
-            ].astype(int32)
+            ].astype(np.int32)
             point_uncertainty_logits = uncertainty_scores_logits[
                 count, val_grid[count][:, 0], val_grid[count][:, 1], val_grid[count][:, 2]
             ]
@@ -114,11 +114,13 @@ def main(args):
             ]
             idx_s = "%06d" % idx[0]
             # point_uncertainty_logits.tofile(
-            #         '/harddisk/jcenaa/semantic_kitti/predictions/sequences/08/scores_logits_naive/' + idx_s + '.label')
+            #         '/home/eo233/phd/Open_world_3D_semantic_segmentation/predictions/semantic_kitti/sequences/08/scores_logits_naive/' + idx_s + '.label')
             # point_uncertainty_softmax.tofile(
-            #     '/harddisk/jcenaa/semantic_kitti/predictions/sequences/08/scores_softmax_19/' + idx_s + '.label')
+            #     '/home/eo233/phd/Open_world_3D_semantic_segmentation/predictions/semantic_kitti/sequences/08/scores_softmax_19/' + idx_s + '.label')
             point_predict.tofile(
-                "/harddisk/jcenaa/semantic_kitti/predictions/sequences/08/predictions_incre/" + idx_s + ".label"
+                "/home/eo233/phd/Open_world_3D_semantic_segmentation/predictions/semantic_kitti/sequences/08/predictions_incre/"
+                + idx_s
+                + ".label"
             )
 
             for count, i_val_grid in enumerate(val_grid):
