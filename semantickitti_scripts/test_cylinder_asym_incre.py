@@ -109,7 +109,7 @@ def main(args):
             count = 0
             point_predict = predict_labels[
                 count, val_grid[count][:, 0], val_grid[count][:, 1], val_grid[count][:, 2]
-            ].astype(int32)
+            ].astype(np.int32)
             point_predict.tofile(path_save[0])
 
             for count, i_val_grid in enumerate(val_grid):
