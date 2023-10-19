@@ -23,11 +23,26 @@ def polar2cat(input_xyz_polar):
 
 @register_dataset
 class cylinder_dataset_nuscenes(data.Dataset):
-    def __init__(self, in_dataset, grid_size, rotate_aug=False, flip_aug=False, ignore_label=0, return_test=False,
-                 fixed_volume_space=False, max_volume_space=[50, np.pi, 3], min_volume_space=[0, -np.pi, -5],
-                 scale_aug=False, transform_aug=False, trans_std=[0.1, 0.1, 0.1],
-                 min_rad=-np.pi / 4, max_rad=np.pi / 4, ds_sample=False, incre=None):
-        'Initialization'
+    def __init__(
+        self,
+        in_dataset,
+        grid_size,
+        rotate_aug=False,
+        flip_aug=False,
+        ignore_label=0,
+        return_test=False,
+        fixed_volume_space=False,
+        max_volume_space=[50, np.pi, 3],
+        min_volume_space=[0, -np.pi, -5],
+        scale_aug=False,
+        transform_aug=False,
+        trans_std=[0.1, 0.1, 0.1],
+        min_rad=-np.pi / 4,
+        max_rad=np.pi / 4,
+        ds_sample=False,
+        incre=None,
+    ):
+        "Initialization"
         self.point_cloud_dataset = in_dataset
         self.grid_size = np.asarray(grid_size)
         self.rotate_aug = rotate_aug
@@ -52,9 +67,10 @@ class cylinder_dataset_nuscenes(data.Dataset):
             xyz, labels = data
         elif len(data) == 3:
             xyz, labels, sig = data
-            if len(sig.shape) == 2: sig = np.squeeze(sig)
+            if len(sig.shape) == 2:
+                sig = np.squeeze(sig)
         else:
-            raise Exception('Return invalid data tuple')
+            raise Exception("Return invalid data tuple")
 
         # random data augmentation by rotation
         if self.rotate_aug:
@@ -79,9 +95,13 @@ class cylinder_dataset_nuscenes(data.Dataset):
         # convert coordinate into polar coordinates
 
         if self.transform:
-            noise_translate = np.array([np.random.normal(0, self.trans_std[0], 1),
-                                        np.random.normal(0, self.trans_std[1], 1),
-                                        np.random.normal(0, self.trans_std[2], 1)]).T
+            noise_translate = np.array(
+                [
+                    np.random.normal(0, self.trans_std[0], 1),
+                    np.random.normal(0, self.trans_std[1], 1),
+                    np.random.normal(0, self.trans_std[2], 1),
+                ]
+            ).T
 
             xyz[:, 0:3] += noise_translate
 
@@ -101,8 +121,9 @@ class cylinder_dataset_nuscenes(data.Dataset):
         cur_grid_size = self.grid_size
         intervals = crop_range / (cur_grid_size - 1)
 
-        if (intervals == 0).any(): print("Zero interval!")
-        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
+        if (intervals == 0).any():
+            print("Zero interval!")
+        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(int)
 
         voxel_position = np.zeros(self.grid_size, dtype=np.float32)
         dim_array = np.ones(len(self.grid_size) + 1, int)
@@ -133,13 +154,29 @@ class cylinder_dataset_nuscenes(data.Dataset):
             data_tuple += (grid_ind, labels, return_fea)
         return data_tuple
 
+
 @register_dataset
 class cylinder_dataset_nuscenes_test(data.Dataset):
-    def __init__(self, in_dataset, grid_size, rotate_aug=False, flip_aug=False, ignore_label=0, return_test=False,
-                 fixed_volume_space=False, max_volume_space=[50, np.pi, 3], min_volume_space=[0, -np.pi, -5],
-                 scale_aug=False, transform_aug=False, trans_std=[0.1, 0.1, 0.1],
-                 min_rad=-np.pi / 4, max_rad=np.pi / 4, ds_sample=False, incre=None):
-        'Initialization'
+    def __init__(
+        self,
+        in_dataset,
+        grid_size,
+        rotate_aug=False,
+        flip_aug=False,
+        ignore_label=0,
+        return_test=False,
+        fixed_volume_space=False,
+        max_volume_space=[50, np.pi, 3],
+        min_volume_space=[0, -np.pi, -5],
+        scale_aug=False,
+        transform_aug=False,
+        trans_std=[0.1, 0.1, 0.1],
+        min_rad=-np.pi / 4,
+        max_rad=np.pi / 4,
+        ds_sample=False,
+        incre=None,
+    ):
+        "Initialization"
         self.point_cloud_dataset = in_dataset
         self.grid_size = np.asarray(grid_size)
         self.rotate_aug = rotate_aug
@@ -164,9 +201,10 @@ class cylinder_dataset_nuscenes_test(data.Dataset):
             xyz, labels = data
         elif len(data) == 3:
             xyz, labels, sig = data
-            if len(sig.shape) == 2: sig = np.squeeze(sig)
+            if len(sig.shape) == 2:
+                sig = np.squeeze(sig)
         else:
-            raise Exception('Return invalid data tuple')
+            raise Exception("Return invalid data tuple")
 
         # random data augmentation by rotation
         if self.rotate_aug:
@@ -191,9 +229,13 @@ class cylinder_dataset_nuscenes_test(data.Dataset):
         # convert coordinate into polar coordinates
 
         if self.transform:
-            noise_translate = np.array([np.random.normal(0, self.trans_std[0], 1),
-                                        np.random.normal(0, self.trans_std[1], 1),
-                                        np.random.normal(0, self.trans_std[2], 1)]).T
+            noise_translate = np.array(
+                [
+                    np.random.normal(0, self.trans_std[0], 1),
+                    np.random.normal(0, self.trans_std[1], 1),
+                    np.random.normal(0, self.trans_std[2], 1),
+                ]
+            ).T
 
             xyz[:, 0:3] += noise_translate
 
@@ -213,8 +255,9 @@ class cylinder_dataset_nuscenes_test(data.Dataset):
         cur_grid_size = self.grid_size
         intervals = crop_range / (cur_grid_size - 1)
 
-        if (intervals == 0).any(): print("Zero interval!")
-        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
+        if (intervals == 0).any():
+            print("Zero interval!")
+        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(int)
 
         voxel_position = np.zeros(self.grid_size, dtype=np.float32)
         dim_array = np.ones(len(self.grid_size) + 1, int)
@@ -245,13 +288,29 @@ class cylinder_dataset_nuscenes_test(data.Dataset):
             data_tuple += (grid_ind, labels, return_fea)
         return data_tuple
 
+
 @register_dataset
 class cylinder_dataset_nuscenes_panop(data.Dataset):
-    def __init__(self, in_dataset, grid_size, rotate_aug=False, flip_aug=False, ignore_label=0, return_test=False,
-                 fixed_volume_space=False, max_volume_space=[50, np.pi, 3], min_volume_space=[0, -np.pi, -5],
-                 scale_aug=False, transform_aug=False, trans_std=[0.1, 0.1, 0.1],
-                 min_rad=-np.pi / 4, max_rad=np.pi / 4, ds_sample=False, incre=None):
-        'Initialization'
+    def __init__(
+        self,
+        in_dataset,
+        grid_size,
+        rotate_aug=False,
+        flip_aug=False,
+        ignore_label=0,
+        return_test=False,
+        fixed_volume_space=False,
+        max_volume_space=[50, np.pi, 3],
+        min_volume_space=[0, -np.pi, -5],
+        scale_aug=False,
+        transform_aug=False,
+        trans_std=[0.1, 0.1, 0.1],
+        min_rad=-np.pi / 4,
+        max_rad=np.pi / 4,
+        ds_sample=False,
+        incre=None,
+    ):
+        "Initialization"
         self.point_cloud_dataset = in_dataset
         self.grid_size = np.asarray(grid_size)
         self.rotate_aug = rotate_aug
@@ -277,9 +336,10 @@ class cylinder_dataset_nuscenes_panop(data.Dataset):
             xyz, labels, instances = data
         elif len(data) == 4:
             xyz, labels, instances, sig = data
-            if len(sig.shape) == 2: sig = np.squeeze(sig)
+            if len(sig.shape) == 2:
+                sig = np.squeeze(sig)
         else:
-            raise Exception('Return invalid data tuple')
+            raise Exception("Return invalid data tuple")
 
         if self.ds_sample:
             minimum_pts_thre = 300
@@ -292,11 +352,11 @@ class cylinder_dataset_nuscenes_panop(data.Dataset):
                 if rnd > 0.5 or labels[instances == instance_idx][0] in unknown_clss:
                     continue
 
-                obj_ins = xyz[instances==instance_idx]
+                obj_ins = xyz[instances == instance_idx]
                 obj_ins_center = np.mean(obj_ins, axis=0)
                 obj_ins = obj_ins - obj_ins_center
-                scale_ds_large = np.random.rand()*1.5+1.5
-                scale_ds_small = np.random.rand()*0.25+0.25
+                scale_ds_large = np.random.rand() * 1.5 + 1.5
+                scale_ds_small = np.random.rand() * 0.25 + 0.25
                 rnd = np.random.rand()
                 scale_ds = scale_ds_large if rnd > 0.5 else scale_ds_small
                 obj_ins = obj_ins * scale_ds + obj_ins_center
@@ -326,9 +386,13 @@ class cylinder_dataset_nuscenes_panop(data.Dataset):
         # convert coordinate into polar coordinates
 
         if self.transform:
-            noise_translate = np.array([np.random.normal(0, self.trans_std[0], 1),
-                                        np.random.normal(0, self.trans_std[1], 1),
-                                        np.random.normal(0, self.trans_std[2], 1)]).T
+            noise_translate = np.array(
+                [
+                    np.random.normal(0, self.trans_std[0], 1),
+                    np.random.normal(0, self.trans_std[1], 1),
+                    np.random.normal(0, self.trans_std[2], 1),
+                ]
+            ).T
 
             xyz[:, 0:3] += noise_translate
 
@@ -348,8 +412,9 @@ class cylinder_dataset_nuscenes_panop(data.Dataset):
         cur_grid_size = self.grid_size
         intervals = crop_range / (cur_grid_size - 1)
 
-        if (intervals == 0).any(): print("Zero interval!")
-        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
+        if (intervals == 0).any():
+            print("Zero interval!")
+        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(int)
 
         voxel_position = np.zeros(self.grid_size, dtype=np.float32)
         dim_array = np.ones(len(self.grid_size) + 1, int)
@@ -380,13 +445,29 @@ class cylinder_dataset_nuscenes_panop(data.Dataset):
             data_tuple += (grid_ind, labels, return_fea)
         return data_tuple
 
+
 @register_dataset
 class cylinder_dataset_nuscenes_panop_incre(data.Dataset):
-    def __init__(self, in_dataset, grid_size, rotate_aug=False, flip_aug=False, ignore_label=0, return_test=False,
-                 fixed_volume_space=False, max_volume_space=[50, np.pi, 3], min_volume_space=[0, -np.pi, -5],
-                 scale_aug=False, transform_aug=False, trans_std=[0.1, 0.1, 0.1],
-                 min_rad=-np.pi / 4, max_rad=np.pi / 4, ds_sample=False, incre=None):
-        'Initialization'
+    def __init__(
+        self,
+        in_dataset,
+        grid_size,
+        rotate_aug=False,
+        flip_aug=False,
+        ignore_label=0,
+        return_test=False,
+        fixed_volume_space=False,
+        max_volume_space=[50, np.pi, 3],
+        min_volume_space=[0, -np.pi, -5],
+        scale_aug=False,
+        transform_aug=False,
+        trans_std=[0.1, 0.1, 0.1],
+        min_rad=-np.pi / 4,
+        max_rad=np.pi / 4,
+        ds_sample=False,
+        incre=None,
+    ):
+        "Initialization"
         self.point_cloud_dataset = in_dataset
         self.grid_size = np.asarray(grid_size)
         self.rotate_aug = rotate_aug
@@ -413,9 +494,10 @@ class cylinder_dataset_nuscenes_panop_incre(data.Dataset):
             xyz, labels, instances, dis_labels = data
         elif len(data) == 5:
             xyz, labels, instances, dis_labels, sig = data
-            if len(sig.shape) == 2: sig = np.squeeze(sig)
+            if len(sig.shape) == 2:
+                sig = np.squeeze(sig)
         else:
-            raise Exception('Return invalid data tuple')
+            raise Exception("Return invalid data tuple")
 
         if self.ds_sample:
             minimum_pts_thre = 300
@@ -428,11 +510,11 @@ class cylinder_dataset_nuscenes_panop_incre(data.Dataset):
                 if rnd > 0.2 or labels[instances == instance_idx][0] != self.incre:
                     continue
 
-                obj_ins = xyz[instances==instance_idx]
+                obj_ins = xyz[instances == instance_idx]
                 obj_ins_center = np.mean(obj_ins, axis=0)
                 obj_ins = obj_ins - obj_ins_center
-                scale_ds_large = np.random.rand()*1.5+1.5
-                scale_ds_small = np.random.rand()*0.25+0.25
+                scale_ds_large = np.random.rand() * 1.5 + 1.5
+                scale_ds_small = np.random.rand() * 0.25 + 0.25
                 rnd = np.random.rand()
                 scale_ds = scale_ds_large if rnd > 0.5 else scale_ds_small
                 obj_ins = obj_ins * scale_ds + obj_ins_center
@@ -462,9 +544,13 @@ class cylinder_dataset_nuscenes_panop_incre(data.Dataset):
         # convert coordinate into polar coordinates
 
         if self.transform:
-            noise_translate = np.array([np.random.normal(0, self.trans_std[0], 1),
-                                        np.random.normal(0, self.trans_std[1], 1),
-                                        np.random.normal(0, self.trans_std[2], 1)]).T
+            noise_translate = np.array(
+                [
+                    np.random.normal(0, self.trans_std[0], 1),
+                    np.random.normal(0, self.trans_std[1], 1),
+                    np.random.normal(0, self.trans_std[2], 1),
+                ]
+            ).T
 
             xyz[:, 0:3] += noise_translate
 
@@ -484,8 +570,9 @@ class cylinder_dataset_nuscenes_panop_incre(data.Dataset):
         cur_grid_size = self.grid_size
         intervals = crop_range / (cur_grid_size - 1)
 
-        if (intervals == 0).any(): print("Zero interval!")
-        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
+        if (intervals == 0).any():
+            print("Zero interval!")
+        grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(int)
 
         voxel_position = np.zeros(self.grid_size, dtype=np.float32)
         dim_array = np.ones(len(self.grid_size) + 1, int)
@@ -523,7 +610,8 @@ class cylinder_dataset_nuscenes_panop_incre(data.Dataset):
             data_tuple += (grid_ind, labels, return_fea, processed_dis_label)
         return data_tuple
 
-@nb.jit('u1[:,:,:](u1[:,:,:],i8[:,:])', nopython=True, cache=True, parallel=False)
+
+@nb.jit("u1[:,:,:](u1[:,:,:],i8[:,:])", nopython=True, cache=True, parallel=False)
 def nb_process_label(processed_label, sorted_label_voxel_pair):
     label_size = 256
     counter = np.zeros((label_size,), dtype=np.uint16)
@@ -542,12 +630,19 @@ def nb_process_label(processed_label, sorted_label_voxel_pair):
 
 def collate_fn_BEV(data):
     data2stack = np.stack([d[0] for d in data]).astype(np.float32)
-    label2stack = np.stack([d[1] for d in data]).astype(np.int)
+    label2stack = np.stack([d[1] for d in data]).astype(int)
     grid_ind_stack = [d[2] for d in data]
     point_label = [d[3] for d in data]
     xyz = [d[4] for d in data]
-    dis_labels = np.stack([d[5] for d in data]).astype(np.int)
-    return torch.from_numpy(data2stack), torch.from_numpy(label2stack), grid_ind_stack, point_label, xyz, torch.from_numpy(dis_labels)
+    dis_labels = np.stack([d[5] for d in data]).astype(int)
+    return (
+        torch.from_numpy(data2stack),
+        torch.from_numpy(label2stack),
+        grid_ind_stack,
+        point_label,
+        xyz,
+        torch.from_numpy(dis_labels),
+    )
 
 
 # SemKITTI_label_name = {0: 'noise',
