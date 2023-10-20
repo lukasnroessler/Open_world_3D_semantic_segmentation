@@ -7,6 +7,7 @@ import numpy as np
 from torch.utils import data
 import yaml
 import pickle
+import open3d as o3d
 from nuscenes.eval.lidarseg.utils import get_samples_in_eval_set
 
 REGISTERED_PC_DATASET_CLASSES = {}
@@ -26,6 +27,171 @@ def get_pc_model_class(name):
     assert name in REGISTERED_PC_DATASET_CLASSES, f"available class: {REGISTERED_PC_DATASET_CLASSES}"
     return REGISTERED_PC_DATASET_CLASSES[name]
 
+@register_dataset
+class AnoVox_val(data.Dataset):
+    def __init__(self, data_path, imageset="train", return_ref=False, label_mapping="anovox-label.yaml", nusc=None):
+        self.return_ref = return_ref
+        with open(label_mapping, "r") as stream:
+            anovox_yaml = yaml.safe_load(stream)
+        self.learning_map = anovox_yaml["learning_map"]
+        self.COLOR_PALETTE = anovox_yaml["color-map"].keys()
+        self.datapath_list()
+
+        # print('The size of %s data is %d'%(split,len(self.points_datapath)))
+
+
+    def __len__(self):
+        "Denotes the total number of samples"
+        return len(self.labels_datapath)
+
+    def datapath_list(self):
+        print("root", self.root)
+        self.points_datapath = []
+        self.labels_datapath = []
+        self.instance_datapath = []
+
+        for scenario in os.listdir(self.root):
+            if scenario == 'Scenario_Configuration_Files':
+                continue
+            point_dir = os.path.join(self.root, scenario, 'PCD')
+
+            # print("point dir:", os.listdir(point_dir))
+            # os.listdir(point_dir).sort()
+            sem_point_dir = os.path.join(self.root, scenario, "SEMANTIC_PCD")
+            # os.listdir(sem_point_dir).sort()
+            try:
+                self.points_datapath += [ os.path.join(point_dir, point_file) for point_file in os.listdir(point_dir)]
+                print("points datapath:", self.points_datapath)
+                self.labels_datapath += [ os.path.join(sem_point_dir, sem_point_file) for sem_point_file in os.listdir(sem_point_dir) ]
+            except:
+                pass
+        
+        # print("points datapath:", self.points_datapath)
+
+
+        # for seq in self.seq_ids[split]:
+        #     point_seq_path = os.path.join(self.root, 'dataset', 'sequences', seq, 'velodyne')
+        #     point_seq_bin = os.listdir(point_seq_path)
+        #     point_seq_bin.sort()
+        #     self.points_datapath += [ os.path.join(point_seq_path, point_file) for point_file in point_seq_bin ]
+
+        #     try:
+        #         label_seq_path = os.path.join(self.root, 'dataset', 'sequences', seq, 'labels')
+        #         point_seq_label = os.listdir(label_seq_path)
+        #         point_seq_label.sort()
+        #         self.labels_datapath += [ os.path.join(label_seq_path, label_file) for label_file in point_seq_label ]
+        #     except:
+        #         pass
+
+        #     try:
+        #         instance_seq_path = os.path.join(self.root, 'dataset', 'sequences', seq, 'instances')
+        #         point_seq_instance = os.listdir(instance_seq_path)
+        #         point_seq_instance.sort()
+        #         self.instance_datapath += [ os.path.join(instance_seq_path, instance_file) for instance_file in point_seq_instance ]
+        #     except:
+        #         pass        
+
+    def __getitem__(self, index):
+        pcd = self.points_datapath[index]
+        pcd = o3d.io.read_point_cloud(pcd)
+        points_set = np.asarray(pcd.points)
+
+        semantic_pcd = self.labels_datapath[index]
+        semantic_pcd = o3d.io.read_point_cloud(semantic_pcd)
+        # semantic_points = np.asarray(semantic_pcd.points)
+        color_labels = np.asarray(semantic_pcd.colors)
+        
+        # transform color labels to labels as integer value
+        sem_labels = (np.asarray(color_labels) * 255.0).astype(np.uint8)
+        new_labels = np.arange(len(sem_labels))
+        for i, value in enumerate(sem_labels): # convert color into label
+            color_index = np.where((self.COLOR_PALETTE == value).all(axis = 1))
+            new_labels[i] = color_index[0][0]
+        sem_labels = new_labels
+        data_tuple = (points_set[:, :3], sem_labels.astype(np.uint8)) # instance_data.astype(np.uint8))
+        if self.return_ref:
+            data_tuple += (points_set[:, 3],)
+        return data_tuple
+
+
+    # def __getitem__(self, index):
+    #     raw_data = np.fromfile(self.im_idx[index], dtype=np.float32).reshape((-1, 4))
+    #     if self.imageset == "test":
+    #         annotated_data = np.expand_dims(np.zeros_like(raw_data[:, 0], dtype=int), axis=1)
+    #     else:
+    #         annotated_data = np.fromfile(
+    #             self.im_idx[index].replace("velodyne", "labels")[:-3] + "label", dtype=np.uint32
+    #         ).reshape((-1, 1))
+    #         semantic_data = annotated_data & 0xFFFF
+    #         instance_data = annotated_data >> 16
+    #         semantic_data = np.vectorize(self.learning_map.__getitem__)(semantic_data)
+
+    #     data_tuple = (raw_data[:, :3], semantic_data.astype(np.uint8), instance_data.astype(np.uint8))
+    #     if self.return_ref:
+    #         data_tuple += (raw_data[:, 3],)
+    #     return data_tuple
+        # return {'points_cluster': points_set, 'semantic_label': sem_labels, 'scan_file': self.points_datapath[index]}
+
+        # return {'points_cluster': points_set, 'scan_file': self.points_datapath[index]}
+
+    
+    def __len__(self):
+        return len(self.points_datapath)
+            
+
+# def visualize_pcd_clusters(p, p_corr, p_slc, gt, cmap="viridis", center_point=None, quantize=False):
+#     pcd = o3d.geometry.PointCloud()
+#     pcd.points = o3d.utility.Vector3dVector(p[:,:3])
+
+#     labels = p[:, -1]
+#     colors = plt.get_cmap(cmap)(labels)
+
+#     # labels = p_slc[:, -1][:,np.newaxis]
+#     # colors = np.concatenate((labels, labels, labels), axis=-1)
+    
+#     # if center_point is not None:
+#     #     lbl = np.argsort(labels)
+#     #     colors[lbl[-20:],:3] = [1., 0., 0.]
+#     pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
+
+#     pcd_corr = o3d.geometry.PointCloud()
+#     pcd_corr.points = o3d.utility.Vector3dVector(p_corr[:,:3])
+
+#     labels = p_corr[:, -1]
+#     colors = plt.get_cmap(cmap)(labels)
+    
+#     if center_point is not None:
+#         lbl = np.argsort(labels)
+#         colors[lbl[-20:],:3] = [1., 0., 0.]
+#     pcd_corr.colors = o3d.utility.Vector3dVector(colors[:, :3])
+
+#     pcd_slc = o3d.geometry.PointCloud()
+#     pcd_slc.points = o3d.utility.Vector3dVector(p_slc[:,:3])
+
+#     labels = p_slc[:, -1]
+#     colors = plt.get_cmap(cmap)(labels)
+    
+#     if center_point is not None:
+#         lbl = np.argsort(labels)
+#         colors[lbl[-20:],:3] = [1., 0., 0.]
+#     pcd_slc.colors = o3d.utility.Vector3dVector(colors[:, :3])
+
+#     pcd = pcd.voxel_down_sample(voxel_size=5)
+#     pcd_corr = pcd_corr.voxel_down_sample(voxel_size=5)
+#     pcd_slc = pcd_slc.voxel_down_sample(voxel_size=5)
+#     gt = gt.voxel_down_sample(voxel_size=5)
+
+#     colors_gt = np.asarray(gt.colors).copy()
+#     colors_gt[:,0] = np.maximum(colors_gt[:,0], 0.2)
+#     colors = np.asarray(pcd.colors)
+
+#     colors[:,0] = colors_gt[:,0]*colors[:,0]
+#     colors[:,1] = colors_gt[:,0]*colors[:,1]
+#     colors[:,2] = colors_gt[:,0]*colors[:,2]
+#     #colors = plt.get_cmap(cmap)(colors)
+#     pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
+
+#     o3d.visualization.draw_geometries([pcd, pcd_corr, pcd_slc, gt])
 
 @register_dataset
 class SemKITTI_demo(data.Dataset):
@@ -590,3 +756,14 @@ def get_nuScenes_label_name(label_mapping):
         nuScenes_label_name[val_] = nuScenesyaml["labels_16"][val_]
 
     return nuScenes_label_name
+
+
+def get_anovox_label_name(label_mapping):
+    with open(label_mapping, "r") as stream:
+        anovoxyaml = yaml.safe_load(stream)
+    anovox_label_name = dict()
+    for i in sorted(list(anovoxyaml["learning_map"].keys()))[::-1]:
+        val_ = anovoxyaml["learning_map"][i]
+        anovox_label_name[val_] = anovoxyaml["labels"][val_]
+
+    return anovox_label_name

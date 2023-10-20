@@ -13,6 +13,8 @@ import torch.optim as optim
 from tqdm import tqdm
 import spconv.pytorch as spconv
 
+# sys.path.append("..")
+
 from utils.metric_util import per_class_iu, fast_hist_crop
 from dataloader.pc_dataset import get_SemKITTI_label_name
 from builder import data_builder, model_builder, loss_builder
@@ -115,7 +117,7 @@ def main(args):
             count = 0
             point_predict = predict_labels[
                 count, val_grid[count][:, 0], val_grid[count][:, 1], val_grid[count][:, 2]
-            ].astype(int32)
+            ].astype(np.uint32)
             point_uncertainty_logits = uncertainty_scores_logits[
                 count, val_grid[count][:, 0], val_grid[count][:, 1], val_grid[count][:, 2]
             ]
@@ -125,16 +127,28 @@ def main(args):
             idx_s = "%06d" % idx[0]
             # point_uncertainty_logits.tofile(
             #         '/harddisk/jcenaa/semantic_kitti/predictions/sequences/08/scores_logits_dummy_latest/' + idx_s + '.label')
-            point_uncertainty_softmax.tofile(
-                "/harddisk/jcenaa/semantic_kitti/predictions/sequences/08/scores_softmax_2dummy_1_01_final_latest/"
-                + idx_s
-                + ".label"
-            )
-            point_predict.tofile(
-                "/harddisk/jcenaa/semantic_kitti/predictions/sequences/08/predictions_2dummy_1_01_final_cross_latest/"
-                + idx_s
-                + ".label"
-            )
+            # point_uncertainty_softmax.tofile(
+            #     "/home/tes_unreal/Desktop/LidarMethod/predictions/semantickitti/scores_softmax_2dummy_1_01_final_latest/"
+            #     + idx_s
+            #     + ".label"
+            # )
+            # point_predict.tofile(
+            #     "/home/tes_unreal/Desktop/LidarMethod/predictions/semantickitti/predictions_2dummy_1_01_final_cross_latest/"
+            #     + idx_s
+            #     + ".label"
+            # )
+
+            uncertainty_path = "/media/tes_unreal/Samsung_T5/BA/semantic_kitti/predictions/sequences/08/scores_softmax_2dummy_1_01_final_latest/" + idx_s + ".label"
+
+            predict_path = "/media/tes_unreal/Samsung_T5/BA/semantic_kitti/predictions/sequences/08/predictions_2dummy_1_01_final_cross_latest/"+  idx_s + ".label"
+
+
+            # point_uncertainty_softmax.tofile(uncertainty_path)
+            # point_predict.tofile(predict_path)
+            np.save(uncertainty_path, point_uncertainty_softmax)
+            np.save(predict_path, point_predict)
+
+
 
             for count, i_val_grid in enumerate(val_grid):
                 hist_list.append(
