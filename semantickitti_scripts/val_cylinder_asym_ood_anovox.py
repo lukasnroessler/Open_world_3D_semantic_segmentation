@@ -52,9 +52,9 @@ def main(args):
     model_load_path = train_hypers["model_load_path"]
     model_save_path = train_hypers["model_save_path"]
 
-    SemKITTI_label_name = get_anovox_label_name(dataset_config["label_mapping"])
-    unique_label = np.asarray(sorted(list(SemKITTI_label_name.keys())))[1:] - 1
-    unique_label_str = [SemKITTI_label_name[x] for x in unique_label + 1]
+    anovox_label_name = get_anovox_label_name(dataset_config["label_mapping"])
+    unique_label = np.asarray(sorted(list(anovox_label_name.keys())))[1:] - 1
+    unique_label_str = [anovox_label_name[x] for x in unique_label + 1]
 
     my_model = model_builder.build(model_config)
     my_model.cylinder_3d_spconv_seg.logits2 = spconv.SubMConv3d(
@@ -138,9 +138,9 @@ def main(args):
             #     + ".label"
             # )
 
-            uncertainty_path = "/media/tes_unreal/Samsung_T5/BA/semantic_kitti/predictions/sequences/08/scores_softmax_2dummy_1_01_final_latest/" + idx_s + ".label"
+            uncertainty_path = "/home/tes_unreal/Desktop/Dataset_BA/lidarpreds/scores_softmax_2dummy_1_01_final_latest/" + idx_s
 
-            predict_path = "/media/tes_unreal/Samsung_T5/BA/semantic_kitti/predictions/sequences/08/predictions_2dummy_1_01_final_cross_latest/"+  idx_s + ".label"
+            predict_path = "/home/tes_unreal/Desktop/Dataset_BA/lidarpreds/predictions_2dummy_1_01_final_cross_latest/"+  idx_s
 
 
             # point_uncertainty_softmax.tofile(uncertainty_path)
