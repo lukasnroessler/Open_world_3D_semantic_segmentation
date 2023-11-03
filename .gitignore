@@ -11,3 +11,5 @@
 *.pyc
 *.nbi
 *.nbc
+models
+*.pyc

@@ -7,7 +7,9 @@ import torch.nn.functional as F
 import numpy as np
 import numba as nb
 import multiprocessing
+print("multiprocessing")
 import torch_scatter
+print("import scatter")
 
 
 class cylinder_fea(nn.Module):
