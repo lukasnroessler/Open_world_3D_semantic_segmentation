@@ -8,7 +8,7 @@ from torch.utils import data
 import yaml
 import pickle
 import open3d as o3d
-from nuscenes.eval.lidarseg.utils import get_samples_in_eval_set
+# from nuscenes.eval.lidarseg.utils import get_samples_in_eval_set
 
 REGISTERED_PC_DATASET_CLASSES = {}
 
@@ -108,7 +108,7 @@ class AnoVox_val(data.Dataset):
         for i, value in enumerate(sem_labels): # convert color into label
             color_index = np.where((self.COLOR_PALETTE == value).all(axis = 1))
             new_labels[i] = color_index[0][0]
-        sem_labels = new_labels
+        sem_labels = new_labels.reshape(-1,1)
         data_tuple = (points_set[:, :3], sem_labels.astype(np.uint8)) # instance_data.astype(np.uint8))
         # if self.return_ref:
         #     data_tuple += (points_set[:, 3],)

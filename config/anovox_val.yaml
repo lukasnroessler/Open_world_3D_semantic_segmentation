@@ -11,7 +11,8 @@ model_params:
     - 360
     - 32
 
-  fea_dim: 9
+  # fea_dim: 9
+  fea_dim: 8
   out_fea_dim: 256
   num_class: 20
   num_input_features: 16
@@ -27,7 +28,7 @@ dataset_params:
   ignore_label: 0
   return_test: False
   fixed_volume_space: True
-  label_mapping: "config/label_mapping/anovox-label.yaml"
+  label_mapping: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/config/label_mapping/anovox-label.yaml"
   max_volume_space:
     - 50
     - 3.1415926
@@ -41,7 +42,9 @@ dataset_params:
 ###################
 ## Data_loader options
 train_data_loader:
-  data_path: "/home/tes_unreal/Desktop/Dataset_BA/AnomalyDatasets/AnoVox"
+  # data_path: "/home/tes_unreal/Desktop/Dataset_BA/AnomalyDatasets/AnoVox"
+  data_path: "/home/lukasnroessler/Anomaly_Datasets/AnoVox"
+
   imageset: "train"
   return_ref: True
   batch_size: 2
@@ -49,7 +52,9 @@ train_data_loader:
   num_workers: 3
 
 val_data_loader:
-  data_path: "/home/tes_unreal/Desktop/Dataset_BA/AnomalyDatasets/AnoVox"
+  # data_path: "/home/tes_unreal/Desktop/Dataset_BA/AnomalyDatasets/AnoVox"
+  data_path: "/home/lukasnroessler/Anomaly_Datasets/AnoVox"
+
   imageset: "val"
   return_ref: True
   batch_size: 1
@@ -61,9 +66,9 @@ val_data_loader:
 ## Train params
 train_params:
   # model_load_path: "/media/tes_unreal/Samsung_T5/BA/semantic_kitti/checkpoints/model_load.pt"
-  model_load_path: "/home/tes_unreal/Desktop/LidarMethod/Open_world_3D_semantic_segmentation/semantickitti_ood_final.pt"
-  model_save_path: "/home/tes_unreal/Desktop/LidarMethod/Open_world_3D_semantic_segmentation/model_save_incre.pt"
-  model_latest_path: "/home/tes_unreal/Desktop/LidarMethod/Open_world_3D_semantic_segmentation/model_latest_incre.pt"
+  model_load_path: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/models/semantickitti_ood_final.pt"
+  model_save_path: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/model_save_incre.pt"
+  model_latest_path: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/model_latest_incre.pt"
   checkpoint_every_n_steps: 4599
   max_num_epochs: 10
   eval_every_n_steps: 4599
