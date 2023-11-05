@@ -11,8 +11,8 @@ model_params:
     - 360
     - 32
 
-  # fea_dim: 9
-  fea_dim: 8
+  fea_dim: 9
+  # fea_dim: 8
   out_fea_dim: 256
   num_class: 20
   num_input_features: 16
@@ -27,6 +27,7 @@ dataset_params:
   pc_dataset_type: "AnoVox_val"
   ignore_label: 0
   return_test: False
+  # return_test: True
   fixed_volume_space: True
   label_mapping: "/home/lukasnroessler/Projects/Open_world_3D_semantic_segmentation/config/label_mapping/anovox-label.yaml"
   max_volume_space:

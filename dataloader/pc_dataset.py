@@ -36,6 +36,8 @@ class AnoVox_val(data.Dataset):
             anovox_yaml = yaml.safe_load(stream)
         # self.learning_map = anovox_yaml["learning_map"]
         self.COLOR_PALETTE = anovox_yaml["color_map"]
+        self.remap = np.array(anovox_yaml["to_SemKITTI"])
+        self.remap_remap = anovox_yaml["learning_map"]
         self.datapath_list()
 
         # print('The size of %s data is %d'%(split,len(self.points_datapath)))
@@ -46,10 +48,13 @@ class AnoVox_val(data.Dataset):
         return len(self.labels_datapath)
 
     def datapath_list(self):
+        def sorter(file_path):
+            identifier = (os.path.basename(file_path).split('.')[0]).split('_')[-1]
+            return int(identifier)
         print("root", self.root)
         self.points_datapath = []
         self.labels_datapath = []
-        self.instance_datapath = []
+        # self.instance_datapath = []
 
         for scenario in os.listdir(self.root):
             if scenario == 'Scenario_Configuration_Files':
@@ -61,11 +66,15 @@ class AnoVox_val(data.Dataset):
             sem_point_dir = os.path.join(self.root, scenario, "SEMANTIC_PCD")
             # os.listdir(sem_point_dir).sort()
             try:
-                self.points_datapath += [ os.path.join(point_dir, point_file) for point_file in os.listdir(point_dir)]
+                self.points_datapath += [os.path.join(point_dir, point_file) for point_file in os.listdir(point_dir)]
+                # self.points_datapath = sorted(points_datapath, key=sorter)
                 print("points datapath:", self.points_datapath)
-                self.labels_datapath += [ os.path.join(sem_point_dir, sem_point_file) for sem_point_file in os.listdir(sem_point_dir) ]
+                self.labels_datapath += [os.path.join(sem_point_dir, sem_point_file) for sem_point_file in os.listdir(sem_point_dir)]
+                # self.labels_datapath = sorted(labels_datapath, key=sorter)
             except:
                 pass
+        self.points_datapath = sorted(self.points_datapath, key=sorter)
+        self.labels_datapath = sorted(self.labels_datapath, key=sorter)
 
         # print("points datapath:", self.points_datapath)
 
@@ -108,10 +117,15 @@ class AnoVox_val(data.Dataset):
         for i, value in enumerate(sem_labels): # convert color into label
             color_index = np.where((self.COLOR_PALETTE == value).all(axis = 1))
             new_labels[i] = color_index[0][0]
+        new_labels = self.remap[new_labels]
+        new_labels = np.array([self.remap_remap[label] for label in new_labels])
         sem_labels = new_labels.reshape(-1,1)
         data_tuple = (points_set[:, :3], sem_labels.astype(np.uint8)) # instance_data.astype(np.uint8))
-        # if self.return_ref:
-        #     data_tuple += (points_set[:, 3],)
+        if self.return_ref:
+            dummy_intensities = np.ones(new_labels.shape)
+            dummy_intensities = dummy_intensities - 0.01
+            data_tuple += (dummy_intensities,)
+
         return data_tuple
 
 
