@@ -3,15 +3,29 @@
 Official implementation of "Open-world semantic segmentation for Lidar Point Clouds", ECCV 2022.
 After saving the corresponding inference result files using this repository, please use [semantic_kitti_api](https://github.com/Jun-CEN/semantic_kitti_api) and [nuScenes_api](https://github.com/Jun-CEN/nuScenes_api) to evaluate the performance.
 
+## Fork Details
+
+Compared to the original repository, this fork builds on more recent packages, including:
+- PyTorch 2.1
+- CUDA 12.1
+- spconv 2.3 (changes supported by code from [robo-alex](https://github.com/xinge008/Cylinder3D/pull/113/commits/df586da89e6275b21370d46619409c42340e1401))
+- numpy 1.24
+
+
 ## Installation
 
-### Requirements
-- PyTorch >= 1.2 
-- yaml
-- Cython
-- [torch-scatter](https://github.com/rusty1s/pytorch_scatter)
-- [nuScenes-devkit](https://github.com/nutonomy/nuscenes-devkit) (optional for nuScenes)
-- [spconv](https://github.com/traveller59/spconv) (tested with spconv==1.2.1 and cuda==10.2)
+1. Clone the repository
+2. Setup a [venv](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) with `python3 -m venv env`
+3. Source the virtual environment with `source env/bin/activate`
+4. Update pip with `pip install --upgrade pip`
+5. Install all dependencies with `pip install -r requirements.txt`
+
+### Test environment
+
+- RTX 3080 Mobile (8 GB)
+- Ubuntu 20.04.6 LTS (running in WSL2 under Windows 11)
+- Python 3.8.10
+- NVIDIA-SMI 545.23.05 (Driver Version: 545.84 CUDA Version: 12.3)
 
 ## Data Preparation
 

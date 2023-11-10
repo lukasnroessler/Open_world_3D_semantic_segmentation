@@ -12,7 +12,7 @@ sys.path.append("..")
 import numpy as np
 import torch
 import torch.optim as optim
-import spconv
+import spconv.pytorch as spconv
 from tqdm import tqdm
 
 from utils.metric_util import per_class_iu, fast_hist_crop

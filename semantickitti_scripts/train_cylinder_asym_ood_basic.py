@@ -10,8 +10,10 @@ import sys
 import numpy as np
 import torch
 import torch.optim as optim
-import spconv
+import spconv.pytorch as spconv
 from tqdm import tqdm
+
+sys.path.append("..")
 
 from utils.metric_util import per_class_iu, fast_hist_crop
 from dataloader.pc_dataset import get_SemKITTI_label_name
@@ -19,7 +21,7 @@ from builder import data_builder, model_builder, loss_builder
 from config.config import load_config_data
 
 from utils.load_save_util import load_checkpoint
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 
 import warnings
 
@@ -86,7 +88,7 @@ def main(args):
     my_model.train()
     global_iter = 0
     check_iter = train_hypers['eval_every_n_steps']
-    writer = SummaryWriter('/harddisk/jcenaa/semantic_kitti/log')
+    # writer = SummaryWriter('/harddisk/jcenaa/semantic_kitti/log')
     while epoch < train_hypers['max_num_epochs']:
         loss_list = []
         pbar = tqdm(total=len(train_dataset_loader))
@@ -162,8 +164,8 @@ def main(args):
             label_dummy[voxel_label_origin.squeeze() == 0] = 0
             loss_dummy = loss_func_train(output_normal_dummy, label_dummy)
 
-            writer.add_scalar('Loss/loss_normal', loss_normal.item(), global_iter)
-            writer.add_scalar('Loss/loss_dummy', loss_dummy.item(), global_iter)
+            # writer.add_scalar('Loss/loss_normal', loss_normal.item(), global_iter)
+            # writer.add_scalar('Loss/loss_dummy', loss_dummy.item(), global_iter)
             # print(point_label_tensor.shape) # [bt, 480, 360, 32]
             # print(outputs.shape) # [bt, 20, 480, 360, 32]
             loss = loss_normal+lamda_1*loss_dummy
@@ -194,7 +196,7 @@ def main(args):
 if __name__ == '__main__':
     # Training settings
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-y', '--config_path', default='config/semantickitti_ood_basic.yaml')
+    parser.add_argument('-y', '--config_path', default='/home/tes_unreal/Desktop/BA/Open_world_3D_semantic_segmentation/config/semantickitti_ood_basic.yaml')
     parser.add_argument('--dummynumber', default=3, type=int, help='number of dummy label.')
     args = parser.parse_args()
 

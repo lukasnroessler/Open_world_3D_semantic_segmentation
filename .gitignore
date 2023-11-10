@@ -1,3 +1,14 @@
+env/
+data/
+checkpoints/
+predictions/
+.vscode/
+builder/__pycache__/
+config/__pycache__/
+dataloader/__pycache__/
+network/__pycache__/
+utils/__pycache__/
+
 *.bin
 *.label
 *.npy

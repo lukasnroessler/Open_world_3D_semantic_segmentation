@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 from tqdm import tqdm
-import spconv
+import spconv.pytorch as spconv
 from apex import amp
 
 from utils.metric_util import per_class_iu, fast_hist_crop

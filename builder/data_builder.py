@@ -44,7 +44,7 @@ def build(dataset_config,
         scale_aug=True,
         transform_aug=True,
         ds_sample=True,
-        incre = incre
+        # incre = incre
     )
 
     val_dataset = get_model_class(dataset_config['dataset_type'])(
