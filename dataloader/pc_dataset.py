@@ -29,7 +29,7 @@ def get_pc_model_class(name):
 
 @register_dataset
 class AnoVox_val(data.Dataset):
-    def __init__(self, data_path, imageset="train", return_ref=False, label_mapping="anovox-label.yaml", nusc=None):
+    def __init__(self, data_path, imageset="val", return_ref=False, label_mapping="anovox-label.yaml", nusc=None):
         self.root = data_path
         self.return_ref = return_ref
         with open(label_mapping, "r") as stream:
@@ -39,7 +39,6 @@ class AnoVox_val(data.Dataset):
         self.remap = np.array(anovox_yaml["to_SemKITTI"])
         self.remap_remap = anovox_yaml["learning_map"]
         self.datapath_list()
-
         # print('The size of %s data is %d'%(split,len(self.points_datapath)))
 
 
@@ -153,6 +152,110 @@ class AnoVox_val(data.Dataset):
     def __len__(self):
         return len(self.points_datapath)
 
+
+@register_dataset
+class AnoVox_train(data.Dataset):
+    def __init__(self, data_path, imageset="train", return_ref=False, label_mapping="anovox-label.yaml", nusc=None):
+        self.root = data_path
+        self.return_ref = return_ref
+        with open(label_mapping, "r") as stream:
+            anovox_yaml = yaml.safe_load(stream)
+        # self.learning_map = anovox_yaml["learning_map"]
+        self.COLOR_PALETTE = anovox_yaml["color_map"]
+        self.remap = np.array(anovox_yaml["to_SemKITTI"])
+        self.train_remap = anovox_yaml["learning_map"]
+        self.datapath_list()
+        print("length: ", len(self.labels_datapath))
+
+        # print('The size of %s data is %d'%(split,len(self.points_datapath)))
+
+
+    def __len__(self):
+        "Denotes the total number of samples"
+        return len(self.labels_datapath)
+
+    def datapath_list(self):
+        def sorter(file_path):
+            identifier = (os.path.basename(file_path).split('.')[0]).split('_')[-1]
+            return int(identifier)
+        print("root", self.root)
+        self.points_datapath = []
+        self.labels_datapath = []
+        # self.instance_datapath = []
+
+        for scenario in os.listdir(self.root):
+            if scenario == 'Scenario_Configuration_Files':
+                continue
+            point_dir = os.path.join(self.root, scenario, 'PCD')
+
+            # print("point dir:", os.listdir(point_dir))
+            # os.listdir(point_dir).sort()
+            sem_point_dir = os.path.join(self.root, scenario, "SEMANTIC_PCD")
+            # os.listdir(sem_point_dir).sort()
+            try:
+                self.points_datapath += [os.path.join(point_dir, point_file) for point_file in os.listdir(point_dir)]
+                # self.points_datapath = sorted(points_datapath, key=sorter)
+                # print("points datapath:", self.points_datapath)
+                self.labels_datapath += [os.path.join(sem_point_dir, sem_point_file) for sem_point_file in os.listdir(sem_point_dir)]
+                # self.labels_datapath = sorted(labels_datapath, key=sorter)
+            except:
+                pass
+        self.points_datapath = sorted(self.points_datapath, key=sorter)
+        self.labels_datapath = sorted(self.labels_datapath, key=sorter)
+
+        # print("points datapath:", self.points_datapath)
+
+
+        # for seq in self.seq_ids[split]:
+        #     point_seq_path = os.path.join(self.root, 'dataset', 'sequences', seq, 'velodyne')
+        #     point_seq_bin = os.listdir(point_seq_path)
+        #     point_seq_bin.sort()
+        #     self.points_datapath += [ os.path.join(point_seq_path, point_file) for point_file in point_seq_bin ]
+
+        #     try:
+        #         label_seq_path = os.path.join(self.root, 'dataset', 'sequences', seq, 'labels')
+        #         point_seq_label = os.listdir(label_seq_path)
+        #         point_seq_label.sort()
+        #         self.labels_datapath += [ os.path.join(label_seq_path, label_file) for label_file in point_seq_label ]
+        #     except:
+        #         pass
+
+        #     try:
+        #         instance_seq_path = os.path.join(self.root, 'dataset', 'sequences', seq, 'instances')
+        #         point_seq_instance = os.listdir(instance_seq_path)
+        #         point_seq_instance.sort()
+        #         self.instance_datapath += [ os.path.join(instance_seq_path, instance_file) for instance_file in point_seq_instance ]
+        #     except:
+        #         pass
+
+    def __getitem__(self, index):
+        pcd = self.points_datapath[index]
+        pcd = o3d.io.read_point_cloud(pcd)
+        points_set = np.asarray(pcd.points)
+        intensities = np.asarray(pcd.colors)[:,0].reshape(-1,1)
+
+        semantic_pcd = self.labels_datapath[index]
+        semantic_pcd = o3d.io.read_point_cloud(semantic_pcd)
+        # semantic_points = np.asarray(semantic_pcd.points)
+        color_labels = np.asarray(semantic_pcd.colors)
+
+        # transform color labels to labels as integer value
+        sem_labels = (np.asarray(color_labels) * 255.0).astype(np.uint8)
+        new_labels = np.arange(len(sem_labels))
+        for i, value in enumerate(sem_labels): # convert color into label
+            color_index = np.where((self.COLOR_PALETTE == value).all(axis = 1))
+            new_labels[i] = color_index[0][0]
+        new_labels = self.remap[new_labels]
+        new_labels = np.array([self.train_remap[label] for label in new_labels])
+        sem_labels = new_labels.reshape(-1,1)
+        data_tuple = (points_set[:, :3], sem_labels.astype(np.uint8)) # instance_data.astype(np.uint8))
+        if self.return_ref:
+            # dummy_intensities = np.ones(new_labels.shape)
+            # dummy_intensities = dummy_intensities - 0.01
+            data_tuple += (intensities,)
+        return data_tuple
+
+
 @register_dataset
 class SemKITTI_demo(data.Dataset):
     def __init__(
@@ -210,6 +313,8 @@ class SemKITTI_sk(data.Dataset):
         self.im_idx = []
         for i_folder in split:
             self.im_idx += absoluteFilePaths("/".join([data_path, str(i_folder).zfill(2), "velodyne"]))
+        print("length: ", len(self.im_idx))
+
 
     def __len__(self):
         "Denotes the total number of samples"
