@@ -55,9 +55,11 @@ class AnoVox_val(data.Dataset):
         self.labels_datapath = []
         # self.instance_datapath = []
 
-        for scenario in os.listdir(self.root):
+        for i, scenario in enumerate(os.listdir(self.root)):
             if scenario == 'Scenario_Configuration_Files':
                 continue
+            if i > 814: # 4070 / 5 = 814
+                break
             point_dir = os.path.join(self.root, scenario, 'PCD')
 
             # print("point dir:", os.listdir(point_dir))
