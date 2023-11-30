@@ -13,7 +13,7 @@ import torch.optim as optim
 from tqdm import tqdm
 import spconv.pytorch as spconv
 
-# sys.path.append("..")
+sys.path.append("..")
 
 from utils.metric_util import per_class_iu, fast_hist_crop
 from dataloader.pc_dataset import get_SemKITTI_label_name, get_anovox_label_name
@@ -138,9 +138,9 @@ def main(args):
             #     + ".label"
             # )
 
-            uncertainty_path = "/home/tes_unreal/Desktop/Dataset_BA/lidarpreds/scores_softmax_2dummy_1_01_final_latest/" + idx_s
+            uncertainty_path = "/home/tes_unreal/Desktop/BA/Open_world_3D_semantic_segmentation/preds/lidar_newanovoxscore/" + str(idx_s).rjust(6, '0')
 
-            predict_path = "/home/tes_unreal/Desktop/Dataset_BA/lidarpreds/predictions_2dummy_1_01_final_cross_latest/"+  idx_s
+            predict_path = "/home/tes_unreal/Desktop/BA/Open_world_3D_semantic_segmentation/preds/lidarnewanovoxclasspreds/"+  str(idx_s).rjust(6, '0')
 
 
             # point_uncertainty_softmax.tofile(uncertainty_path)
@@ -174,7 +174,7 @@ def main(args):
 if __name__ == "__main__":
     # Training settings
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument("-y", "--config_path", default="config/semantickitti_ood_final.yaml")
+    parser.add_argument("-y", "--config_path", default="/home/tes_unreal/Desktop/BA/Open_world_3D_semantic_segmentation/config/anovox_val.yaml")
     parser.add_argument("--dummynumber", default=2, type=int, help="number of dummy label.")
     args = parser.parse_args()
 

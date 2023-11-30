@@ -69,7 +69,6 @@ class AnoVox_val(data.Dataset):
             try:
                 self.points_datapath += [os.path.join(point_dir, point_file) for point_file in os.listdir(point_dir)]
                 # self.points_datapath = sorted(points_datapath, key=sorter)
-                print("points datapath:", self.points_datapath)
                 self.labels_datapath += [os.path.join(sem_point_dir, sem_point_file) for sem_point_file in os.listdir(sem_point_dir)]
                 # self.labels_datapath = sorted(labels_datapath, key=sorter)
             except:
@@ -106,6 +105,8 @@ class AnoVox_val(data.Dataset):
         pcd = self.points_datapath[index]
         pcd = o3d.io.read_point_cloud(pcd)
         points_set = np.asarray(pcd.points)
+        intensities = np.asarray(pcd.colors)[:,0].reshape(-1,1)
+
 
         semantic_pcd = self.labels_datapath[index]
         semantic_pcd = o3d.io.read_point_cloud(semantic_pcd)
@@ -123,6 +124,7 @@ class AnoVox_val(data.Dataset):
         sem_labels = new_labels.reshape(-1,1)
         data_tuple = (points_set[:, :3], sem_labels.astype(np.uint8)) # instance_data.astype(np.uint8))
         if self.return_ref:
+            # data_tuple += (intensities,)
             dummy_intensities = np.ones(new_labels.shape)
             dummy_intensities = dummy_intensities - 0.01
             data_tuple += (dummy_intensities,)
@@ -159,6 +161,7 @@ class AnoVox_val(data.Dataset):
 class AnoVox_train(data.Dataset):
     def __init__(self, data_path, imageset="train", return_ref=False, label_mapping="anovox-label.yaml", nusc=None):
         self.root = data_path
+        self.imageset = imageset
         self.return_ref = return_ref
         with open(label_mapping, "r") as stream:
             anovox_yaml = yaml.safe_load(stream)
@@ -185,9 +188,11 @@ class AnoVox_train(data.Dataset):
         self.labels_datapath = []
         # self.instance_datapath = []
 
-        for scenario in os.listdir(self.root):
+        for i, scenario in enumerate(os.listdir(self.root)):
             if scenario == 'Scenario_Configuration_Files':
                 continue
+            if i > 814 and self.imageset == "val": # 4070 / 5 = 814
+                break
             point_dir = os.path.join(self.root, scenario, 'PCD')
 
             # print("point dir:", os.listdir(point_dir))
